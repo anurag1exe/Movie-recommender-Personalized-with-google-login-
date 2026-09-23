@@ -1,0 +1,7 @@
+[server]
+# Hide detailed errors in production (Items 11 & 12)
+showErrorDetails = false
+
+# Add security headers (Item 19)
+enableCORS = true
+enableXsrfProtection = true
