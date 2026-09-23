@@ -161,20 +161,39 @@ with st.spinner('Waking up the AI...'):
     model, movie_dict, all_movie_ids, user_ids, ratings, nlp_model = init_system()
 
 # --- Sidebar Configuration (Auth) ---
-if not st.user.is_logged_in:
-    st.sidebar.markdown("### 🔐 Login")
-    st.sidebar.write("Login with Google to get personalized movie recommendations!")
-    if st.sidebar.button("Login with Google", type="primary"):
-        st.login("google")
-    st.sidebar.markdown("---")
-    st.sidebar.info("You must log in to use the application.")
+try:
+    if not st.user.is_logged_in:
+        st.sidebar.markdown("### 🔐 Login")
+        st.sidebar.write("Login with Google to get personalized movie recommendations!")
+        if st.sidebar.button("Login with Google", type="primary"):
+            st.login("google")
+        st.sidebar.markdown("---")
+        st.sidebar.info("You must log in to use the application.")
+        st.stop()
+    
+    user_email = st.user.email
+    st.sidebar.markdown(f"### 👋 Welcome back!")
+    st.sidebar.write(f"Logged in as **{user_email}**")
+    if st.sidebar.button("Logout"):
+        st.logout()
+except Exception as e:
+    st.error("⚠️ **Authentication Configuration Missing**")
+    st.warning(f"Streamlit encountered an error accessing `st.user`. This usually happens when the `[auth]` section is missing from your Streamlit Cloud Secrets. (Internal error: `{e}`)")
+    st.info("""
+    **To fix this, go to your Streamlit Cloud dashboard -> App settings -> Secrets, and add the following format:**
+    
+    ```toml
+    [auth]
+    redirect_uri = "https://movierecommenderrr.streamlit.app/oauth2callback"
+    cookie_secret = "replace_this_with_a_random_long_string"
+    
+    [auth.google]
+    client_id = "YOUR_EXISTING_GOOGLE_CLIENT_ID"
+    client_secret = "YOUR_EXISTING_GOOGLE_CLIENT_SECRET"
+    server_metadata_url = "https://accounts.google.com/.well-known/openid-configuration"
+    ```
+    """)
     st.stop()
-
-user_email = st.user.email
-st.sidebar.markdown(f"### 👋 Welcome back!")
-st.sidebar.write(f"Logged in as **{user_email}**")
-if st.sidebar.button("Logout"):
-    st.logout()
 
 # Link the Google email to our internal DB user ID
 selected_user = get_or_create_user(user_email)
